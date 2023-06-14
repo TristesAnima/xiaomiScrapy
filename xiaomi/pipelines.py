@@ -2,7 +2,6 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-import os
 
 import requests
 # useful for handling different item types with a single interface
@@ -24,21 +23,21 @@ class XiaomiPipeline:
         self.file.close()
 
 
+def save_image(url, name):
+    file_name = f"{name}.jpg"
+    res = requests.get(url)
+    if 200 == res.status_code:
+        with open(fr"D:\pythonProject\Scrapy\xiaomiScrapy\img\{file_name}", "wb") as file:
+            file.write(res.content)
+
+
 class ImagePipeline:
+    def __init__(self):
+        self.n = 0
+
     def process_item(self, item, spider):
-        n = 0
-        if 'src' in item:
-            n += 1
-            image_url = item['src']
-            image_path = os.path.join('img', n)
-
-            response = requests.get(image_url)
-            if response.status_code == 200:
-                with open(image_path, 'wb') as f:
-                    f.write(response.content)
-                item['image_path'] = image_path
-            else:
-                # 处理下载失败的情况
-                item['image_path'] = None
-
+        if item["src"] != '':
+            print(item["src"])
+            self.n += 1
+            save_image(item["src"], self.n)
         return item
